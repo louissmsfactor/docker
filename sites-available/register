@@ -1,0 +1,25 @@
+server {
+    server_name register.smsfactor.local;
+    listen 80;
+    root /home/louis/dev/register-gateway;
+    index index.php index.html index.htm;
+	error_log /var/log/nginx/error_register.log notice;
+	access_log /var/log/nginx/access_register.log combined;
+	location / {
+		try_files $uri $uri/ /index.php$is_args$args;
+		rewrite ^/?$ /index.php?route=index last;
+		#rewrite ^/([a-zA-Z0-9_-]+)\.html$ /index.php?route=$1 last;
+	}
+    location /v2 {
+        try_files $uri $uri/ /index.php;
+        rewrite ^.*$ /v2/index.php last;
+    }
+    # pass PHP scripts to FastCGI server
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        include snippets/fastcgi-php.conf;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        # With php-fpm (or other unix sockets):
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+    }
+}

@@ -1,0 +1,39 @@
+server {
+        listen 80;
+        listen [::]:80;
+    	listen 443 ssl;
+    	listen [::]:443;
+        server_name platform.local;
+        root /home/louis/dev/www/plateforme/web/www;
+        index index.php index.html index.htm;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    error_log /var/log/nginx/error_secure.log notice;
+    access_log /var/log/nginx/access_secure.log combined;
+    rewrite_log off;
+    #location ~ /p/ {
+        #        rewrite ^\/p\/view([0-9]+)$ /p/index.php?id=$1 break;
+        #}
+        location / {
+        rewrite ^/?$ /index.php?route=index last;
+        rewrite ^/([a-zA-Z0-9_-]+)\.html$ /index.php?route=$1 last;
+        }
+    location ~* .(jpg|jpeg|png|gif|ico|css|js)$ {
+                expires 365d;
+        }
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        if (!-f $document_root$fastcgi_script_name) {
+            return 404;
+        }
+        # Mitigate https://httpoxy.org/ vulnerabilities
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_read_timeout 900;
+        #fastcgi_pass 127.0.0.1:9000;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+}

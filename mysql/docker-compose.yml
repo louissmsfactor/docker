@@ -1,0 +1,28 @@
+# Use root/example as user/password credentials
+version: '3.7'
+
+services:
+  db:
+    image: mysql:5.7
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=smsfactor
+      - TZ=Europe/Paris
+    ports:
+      - 3306:3306
+    volumes:
+      - my-db:/var/lib/mysql
+      - ./conf.d:/etc/mysql/conf.d
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+      
+volumes:
+  my-db:
+    driver: local
+  # mysql-log:
+  #   driver: local
